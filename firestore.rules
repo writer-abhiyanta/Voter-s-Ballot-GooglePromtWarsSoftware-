@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitives
+    function isSignedIn() { return request.auth != null; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+
+    // User Model
+    function isValidUser(data) {
+      return data.keys().hasAll(['email', 'role', 'points', 'createdAt', 'updatedAt'])
+        && data.email is string && data.email.size() <= 256
+        && data.role is string && (data.role == 'voter' || data.role == 'anglo_voter')
+        && data.points is number
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow list: if false; // Users shouldn't list other users
+      allow create: if isSignedIn() 
+        && isValidId(userId)
+        && request.auth.uid == userId
+        && isValidUser(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && incoming().points == 0
+        && (!incoming().keys().hasAny(['badges', 'level1Completed', 'level2Completed', 'matchedCandidateId']));
+      
+      allow update: if isSignedIn()
+        && isValidId(userId)
+        && request.auth.uid == userId
+        && incoming().email == existing().email
+        && incoming().role == existing().role
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          (incoming().diff(existing()).affectedKeys().hasOnly(['updatedAt', 'points', 'badges', 'level1Completed', 'level2Completed', 'matchedCandidateId']))
+        );
+    }
+
+    // Candidates Models
+    match /candidates/{candidateId} {
+      allow read, list: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == candidateId;
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Voter's Ballot",
+  "description": "Gamified learning for voter education, candidate discovery, and polling booth simulations.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}

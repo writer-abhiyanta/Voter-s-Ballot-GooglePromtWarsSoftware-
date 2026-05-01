@@ -1,0 +1,47 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A registered user in the gamified learning app.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["voter", "anglo_voter"], "description": "Type of user" },
+        "points": { "type": "number", "description": "Learning points collected" },
+        "badges": { "type": "array", "items": { "type": "string" }, "description": "Unlocked badges" },
+        "level1Completed": { "type": "boolean" },
+        "level2Completed": { "type": "boolean" },
+        "matchedCandidateId": { "type": "string", "description": "Candidate matched via quiz" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "role", "points", "createdAt", "updatedAt"]
+    },
+    "Candidate": {
+      "title": "Candidate",
+      "description": "A candidate profile for the swipe discovery game.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "party": { "type": "string" },
+        "education": { "type": "string" },
+        "experience": { "type": "string" },
+        "manifesto": { "type": "array", "items": { "type": "string" } },
+        "performance": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "issuesAlignment": { "type": "object", "description": "Map of issue tags to alignment score (0-1)" }
+      },
+      "required": ["name", "party", "education", "experience"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles and game progress"
+    },
+    "candidates/{candidateId}": {
+      "schema": { "$ref": "#/entities/Candidate" },
+      "description": "Candidate profiles for discovery"
+    }
+  }
+}
