@@ -1,9 +1,14 @@
 {
-  "name": "Voter's Ballot",
+  "name": "Voter's Ballot - Verified Informed Voter",
+  "short_name": "Voter's Ballot",
   "description": "Gamified learning for voter education, candidate discovery, and polling booth simulations.",
   "requestFramePermissions": [
     "camera",
     "geolocation"
   ],
-  "majorCapabilities": []
+  "majorCapabilities": [],
+  "theme_color": "#10b981",
+  "background_color": "#0a0a0a",
+  "display": "standalone",
+  "orientation": "portrait-primary"
 }

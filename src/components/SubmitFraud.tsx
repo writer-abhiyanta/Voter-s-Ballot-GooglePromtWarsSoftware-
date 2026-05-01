@@ -83,10 +83,12 @@ export const SubmitFraud: React.FC = () => {
         className="bg-neutral-900 border border-neutral-800 p-8 rounded-2xl space-y-6"
       >
         <div>
-          <label className="block text-sm font-medium text-neutral-300 mb-2">Incident Location / Polling Booth</label>
+          <label htmlFor="location" className="block text-sm font-medium text-neutral-300 mb-2">Incident Location / Polling Booth</label>
           <input
+            id="location"
             type="text"
             required
+            aria-required="true"
             className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
             placeholder="e.g., denmark tannoor"
             value={formData.location}
@@ -95,9 +97,11 @@ export const SubmitFraud: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-neutral-300 mb-2">Type of Incident</label>
+          <label htmlFor="incidentType" className="block text-sm font-medium text-neutral-300 mb-2">Type of Incident</label>
           <select
+            id="incidentType"
             required
+            aria-required="true"
             className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all appearance-none"
             value={formData.incidentType}
             onChange={(e) => setFormData({ ...formData, incidentType: e.target.value })}
@@ -114,9 +118,11 @@ export const SubmitFraud: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-neutral-300 mb-2">Detailed Description</label>
+          <label htmlFor="description" className="block text-sm font-medium text-neutral-300 mb-2">Detailed Description</label>
           <textarea
+            id="description"
             required
+            aria-required="true"
             rows={4}
             className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all resize-none"
             placeholder="Please provide as much detail as possible about what you observed..."

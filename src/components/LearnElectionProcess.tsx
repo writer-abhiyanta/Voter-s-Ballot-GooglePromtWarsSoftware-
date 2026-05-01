@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, ChevronRight, VotingBox, FileCheck, Users, Vote, ListTodo, MessageSquareWarning, Lightbulb, AlertTriangle, Award } from 'lucide-react';
+import { CheckCircle2, ChevronRight, FileCheck, Users, Vote, ListTodo, MessageSquareWarning, Lightbulb, AlertTriangle, Award } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 const STEPS = [
