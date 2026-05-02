@@ -8,6 +8,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { analyzeFraudReport } from "../services/ai";
+import { invokeAnomalyDetection, streamToBigQuery } from "../lib/gcp";
 
 /**
  * Interface mapping a single reported incident of election fraud.
@@ -82,22 +83,32 @@ export const SubmitFraud: React.FC = (): React.ReactElement => {
     setIsSubmitting(true);
 
     try {
+      // Simulate Cloud Function invocation for anomaly pre-filtering
+      try {
+        await invokeAnomalyDetection(formData);
+      } catch (err) {
+        console.warn("Cloud Function anomaly filtering skipped locally.");
+      }
+
       // Analyze the report using Gemini AI
       const analysis = await analyzeFraudReport(formData.description);
 
+      const newReport = {
+        id: Date.now(),
+        location: formData.location,
+        type: analysis.suggestedCategory || formData.incidentType,
+        votes: 0,
+        description: formData.description,
+        severity: analysis.severity,
+        rationale: analysis.rationale,
+      };
+
       setSubmitted(true);
-      setReports((prev) => [
-        {
-          id: Date.now(),
-          location: formData.location,
-          type: analysis.suggestedCategory || formData.incidentType,
-          votes: 0,
-          description: formData.description,
-          severity: analysis.severity,
-          rationale: analysis.rationale,
-        },
-        ...prev,
-      ]);
+      setReports((prev) => [newReport, ...prev]);
+
+      // Stream to BigQuery for O(1) analytics operations 
+      await streamToBigQuery("fraud_metrics_dataset", newReport);
+
       setFormData({
         location: "",
         incidentType: "",

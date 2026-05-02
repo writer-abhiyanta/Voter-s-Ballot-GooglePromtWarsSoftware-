@@ -18,6 +18,11 @@ import {
 } from "../lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { ValidatedInput } from "./ValidatedInput";
+
+export const validateAlphanumeric = (val: string) => val.trim().length === 0 ? null : /^[a-zA-Z0-9 -]+$/.test(val) ? null : "Only letters, numbers, and hyphens";
+export const validateNumber = (val: string) => val.trim().length === 0 ? null : /^[0-9]+(\.[0-9]{1,2})?$/.test(val) ? null : "Must be a valid number";
+export const validateYear = (val: string) => val.trim().length === 0 ? null : /^(19|20)\d{2}$/.test(val) ? null : "Must be a 4-digit valid year";
 
 interface AssetFile {
   file: File;
@@ -73,6 +78,14 @@ export const AssetDeclarationForm: React.FC = () => {
     }
   };
 
+  const isFormValid = () => {
+    return (
+      businesses.every(b => validateAlphanumeric(b.name) === null && validateAlphanumeric(b.registrationNo) === null && validateNumber(b.value) === null) &&
+      properties.every(p => validateAlphanumeric(p.address) === null && validateNumber(p.value) === null) &&
+      vehicles.every(v => validateAlphanumeric(v.makeModel) === null && validateYear(v.year) === null && validateNumber(v.value) === null)
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -80,6 +93,11 @@ export const AssetDeclarationForm: React.FC = () => {
     setUploadProgress(0);
 
     try {
+      if (user.uid === "demo-user-1234") {
+        setTimeout(() => setIsSuccess(true), 1500);
+        return;
+      }
+
       // 1. Upload files to Storage
       const uploadedDocuments: {
         url: string;
@@ -180,33 +198,39 @@ export const AssetDeclarationForm: React.FC = () => {
           <div className="space-y-4">
             {businesses.map((biz, idx) => (
               <div key={idx} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input
+                <ValidatedInput
                   type="text"
                   placeholder="Business Name"
                   required
-                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white"
+                  validationFn={validateAlphanumeric}
+                  onValidChange={() => {}}
                   onChange={(e) => {
                     const newBiz = [...businesses];
                     newBiz[idx].name = e.target.value;
                     setBusinesses(newBiz);
                   }}
                 />
-                <input
+                <ValidatedInput
                   type="text"
                   placeholder="Registration / Tax ID"
                   required
-                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white"
+                  validationFn={validateAlphanumeric}
+                  onValidChange={() => {}}
                   onChange={(e) => {
                     const newBiz = [...businesses];
                     newBiz[idx].registrationNo = e.target.value;
                     setBusinesses(newBiz);
                   }}
                 />
-                <input
+                <ValidatedInput
                   type="text"
                   placeholder="Estimated Value ($)"
                   required
-                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white"
+                  validationFn={validateNumber}
+                  onValidChange={() => {}}
                   onChange={(e) => {
                     const newBiz = [...businesses];
                     newBiz[idx].value = e.target.value;
@@ -234,11 +258,13 @@ export const AssetDeclarationForm: React.FC = () => {
           <div className="space-y-4">
             {properties.map((prop, idx) => (
               <div key={idx} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input
+                <ValidatedInput
                   type="text"
                   placeholder="Address or Location"
                   required
-                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white"
+                  validationFn={validateAlphanumeric}
+                  onValidChange={() => {}}
                   onChange={(e) => {
                     const newProp = [...properties];
                     newProp[idx].address = e.target.value;
@@ -258,11 +284,13 @@ export const AssetDeclarationForm: React.FC = () => {
                   <option value="Commercial">Commercial</option>
                   <option value="Agricultural">Agricultural</option>
                 </select>
-                <input
+                <ValidatedInput
                   type="text"
                   placeholder="Estimated Value ($)"
                   required
-                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white"
+                  validationFn={validateNumber}
+                  onValidChange={() => {}}
                   onChange={(e) => {
                     const newProp = [...properties];
                     newProp[idx].value = e.target.value;
@@ -290,33 +318,39 @@ export const AssetDeclarationForm: React.FC = () => {
           <div className="space-y-4">
             {vehicles.map((veh, idx) => (
               <div key={idx} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input
+                <ValidatedInput
                   type="text"
                   placeholder="Make and Model"
                   required
-                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white"
+                  validationFn={validateAlphanumeric}
+                  onValidChange={() => {}}
                   onChange={(e) => {
                     const newVeh = [...vehicles];
                     newVeh[idx].makeModel = e.target.value;
                     setVehicles(newVeh);
                   }}
                 />
-                <input
+                <ValidatedInput
                   type="text"
                   placeholder="Year"
                   required
-                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white"
+                  validationFn={validateYear}
+                  onValidChange={() => {}}
                   onChange={(e) => {
                     const newVeh = [...vehicles];
                     newVeh[idx].year = e.target.value;
                     setVehicles(newVeh);
                   }}
                 />
-                <input
+                <ValidatedInput
                   type="text"
                   placeholder="Estimated Value ($)"
                   required
-                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500"
+                  className="bg-neutral-950 border border-neutral-800 rounded-lg px-4 py-2 text-white"
+                  validationFn={validateNumber}
+                  onValidChange={() => {}}
                   onChange={(e) => {
                     const newVeh = [...vehicles];
                     newVeh[idx].value = e.target.value;
@@ -404,7 +438,7 @@ export const AssetDeclarationForm: React.FC = () => {
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={isSubmitting || isSuccess}
+            disabled={isSubmitting || isSuccess || !isFormValid()}
             className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-lg font-medium inline-flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:opacity-50"
           >
             {isSubmitting ? (

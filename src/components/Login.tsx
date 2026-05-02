@@ -12,10 +12,14 @@ import {
 import { Mail, CheckCircle2, User, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "./AuthProvider";
+import { ValidatedInput } from "./ValidatedInput";
+
+const validateVoterId = (val: string) => val.trim().length === 0 ? null : /^[A-Z]{3}-\d{5}$/.test(val) ? null : "Must format: ABC-12345";
 
 const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [voterId, setVoterId] = useState("");
   const [selectedRole, setSelectedRole] = useState<
     "voter" | "anglo_voter" | "candidate" | null
   >(null);
@@ -40,6 +44,10 @@ const Login: React.FC = () => {
   const handleLogin = async () => {
     if (!selectedRole) {
       setError("Please select a role before signing in.");
+      return;
+    }
+    if ((selectedRole === "voter" || selectedRole === "anglo_voter") && validateVoterId(voterId)) {
+      setError("Please enter a valid Voter ID (Format: ABC-12345)");
       return;
     }
     setLoading(true);
@@ -73,6 +81,10 @@ const Login: React.FC = () => {
         setError(
           "Network error. If you are using a preview, please open the app in a new tab or enable third-party cookies.",
         );
+      } else if (err.code === "auth/popup-closed-by-user") {
+        setError("Sign-in cancelled. Please try again.");
+      } else if (err.code === "auth/cancelled-popup-request") {
+        setError("Multiple popups opened. Please close others and try again.");
       } else {
         setError(err.message || "Failed to sign in.");
       }
@@ -247,6 +259,20 @@ const Login: React.FC = () => {
         </div>
 
         <div className="space-y-6 mb-8">
+          {(selectedRole === "voter" || selectedRole === "anglo_voter") && (
+            <div className="mb-4">
+              <label className="text-neutral-300 text-sm font-medium mb-1 block">Voter ID</label>
+              <ValidatedInput
+                type="text"
+                placeholder="ABC-12345"
+                validationFn={validateVoterId}
+                onValidChange={() => {}}
+                value={voterId}
+                onChange={(e) => setVoterId(e.target.value.toUpperCase())}
+                className="w-full bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none"
+              />
+            </div>
+          )}
           <div>
             <p className="text-neutral-300 text-sm font-medium mb-3 text-center">
               Select your role to join
@@ -255,24 +281,24 @@ const Login: React.FC = () => {
               <button
                 onClick={() => setSelectedRole("candidate")}
                 aria-pressed={selectedRole === "candidate"}
-                className={`relative p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 ${
+                className={`relative p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 ${
                   selectedRole === "candidate"
-                    ? "bg-blue-500/10 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)]"
-                    : "bg-neutral-900 border-neutral-800 hover:border-blue-500/50"
+                    ? "bg-green-500/10 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.3)]"
+                    : "bg-neutral-900 border-neutral-800 hover:border-green-500/50"
                 }`}
               >
                 {selectedRole === "candidate" && (
                   <CheckCircle2
-                    className="absolute top-2 right-2 w-4 h-4 text-blue-500"
+                    className="absolute top-2 right-2 w-4 h-4 text-green-500"
                     aria-hidden="true"
                   />
                 )}
                 <User
-                  className={`w-8 h-8 ${selectedRole === "candidate" ? "text-blue-500" : "text-blue-500/50"}`}
+                  className={`w-8 h-8 ${selectedRole === "candidate" ? "text-green-500" : "text-green-500/50"}`}
                   aria-hidden="true"
                 />
                 <span
-                  className={`text-sm font-medium italic ${selectedRole === "candidate" ? "text-blue-400" : "text-blue-500/70"}`}
+                  className={`text-sm font-medium italic ${selectedRole === "candidate" ? "text-green-400" : "text-green-500/70"}`}
                 >
                   Candidate
                 </span>
@@ -333,7 +359,7 @@ const Login: React.FC = () => {
 
         <button
           onClick={handleLogin}
-          disabled={loading || !selectedRole}
+          disabled={loading || !selectedRole || ((selectedRole === "voter" || selectedRole === "anglo_voter") && validateVoterId(voterId) !== null)}
           className="w-full flex items-center justify-center gap-3 bg-white text-black py-3 px-4 rounded-xl font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
         >
           {loading ? (

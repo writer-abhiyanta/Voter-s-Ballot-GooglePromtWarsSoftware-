@@ -7,9 +7,9 @@ import {
 } from "./services/ai";
 
 // Mocking process environment
-vi.mock("@google/genai", () => ({
-  GoogleGenAI: vi.fn().mockImplementation(() => ({
-    models: {
+vi.mock("@google/genai", () => {
+  class GoogleGenAI {
+    models = {
       generateContent: vi.fn().mockResolvedValue({
         text: JSON.stringify({
           severity: "CRITICAL",
@@ -18,10 +18,10 @@ vi.mock("@google/genai", () => ({
         }),
         functionCalls: [],
       }),
-    },
-  })),
-  Type: { OBJECT: "object", STRING: "string" },
-}));
+    };
+  }
+  return { GoogleGenAI, Type: { OBJECT: "object", STRING: "string" } };
+});
 
 describe("AI Engineering Resilience & Edge Cases (TDD)", () => {
   it("Pattern: Singleton Lazy Instantiation for Client", () => {

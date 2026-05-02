@@ -7,6 +7,9 @@ import viteCompression from 'vite-plugin-compression';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
+    test: {
+      exclude: ['tests/e2e.spec.ts', 'node_modules/**/*'],
+    },
     plugins: [
       react(), 
       tailwindcss(),

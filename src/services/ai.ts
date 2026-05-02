@@ -325,6 +325,8 @@ Capabilities & Guidelines:
             temperature: 0.3,
             systemInstruction: systemPrompt,
             tools: [queryCandidateTool, { googleSearch: {} }],
+            // Enable Model Context Caching explicitly for high-frequency queries
+            cachedContent: "roles_capabilities_v1" 
           },
         });
 

@@ -112,7 +112,7 @@ export const EnrollmentMission: React.FC<{ onComplete: () => void }> = ({
       shapes: ["square"],
     });
 
-    if (user) {
+    if (user && user.uid !== "demo-user-1234") {
       try {
         const userRef = doc(db, "users", user.uid);
         await updateDoc(userRef, {

@@ -43,6 +43,21 @@ export default function ManifestoManager() {
   }, [user]);
 
   const fetchProfile = async () => {
+    if (user?.uid === "demo-user-1234") {
+      setProfile({
+        name: "Demo Candidate",
+        party: "Demo Party",
+        education: "",
+        experience: "",
+        imageUrl: "",
+        manifestoItems: [],
+        performance: "",
+      });
+      setIsEditingProfile(true);
+      setLoading(false);
+      return;
+    }
+
     try {
       const docRef = doc(db, "candidates", user!.uid);
       const docSnap = await getDoc(docRef);
@@ -78,6 +93,10 @@ export default function ManifestoManager() {
 
   const saveProfile = async () => {
     if (!profile) return;
+    if (user?.uid === "demo-user-1234") {
+      setIsEditingProfile(false);
+      return;
+    }
     try {
       const docRef = doc(db, "candidates", user!.uid);
       const docSnap = await getDoc(docRef);
@@ -109,6 +128,8 @@ export default function ManifestoManager() {
     setProfile(updatedProfile);
     setNewItemText("");
 
+    if (user?.uid === "demo-user-1234") return;
+
     try {
       const docRef = doc(db, "candidates", user!.uid);
       await updateDoc(docRef, {
@@ -131,6 +152,8 @@ export default function ManifestoManager() {
 
     const updatedProfile = { ...profile, manifestoItems: updatedItems };
     setProfile(updatedProfile);
+    
+    if (user?.uid === "demo-user-1234") return;
 
     try {
       const docRef = doc(db, "candidates", user!.uid);
@@ -149,6 +172,8 @@ export default function ManifestoManager() {
 
     const updatedProfile = { ...profile, manifestoItems: updatedItems };
     setProfile(updatedProfile);
+    
+    if (user?.uid === "demo-user-1234") return;
 
     try {
       const docRef = doc(db, "candidates", user!.uid);

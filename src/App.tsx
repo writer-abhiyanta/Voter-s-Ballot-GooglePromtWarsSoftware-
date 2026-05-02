@@ -103,6 +103,58 @@ const PageLoader = (): React.ReactElement => (
 );
 
 /**
+ * Tab Content Resolver
+ * Atomic component that evaluates which tab content to render, minimizing Dashboard cyclomatic complexity.
+ * 
+ * @param {Object} props
+ * @param {string} props.activeTab - Current active tab id.
+ * @param {boolean} props.level1Done - Enrollment completion state.
+ * @param {Function} props.setLevel1Done - Function to update enrollment state.
+ * @param {Function} props.setActiveTab - Function to navigate tabs.
+ * @param {Function} props.setIsBadgeEarned - Function to update gamified learning badge.
+ * @returns {JSX.Element | null} The resolved chunk component.
+ */
+function TabContent({ activeTab, level1Done, setLevel1Done, setActiveTab, setIsBadgeEarned }: { activeTab: string, level1Done: boolean, setLevel1Done: (val: boolean) => void, setActiveTab: (val: any) => void, setIsBadgeEarned: (val: boolean) => void }): React.ReactElement | null {
+  if (activeTab === "manifesto") return <ManifestoManager />;
+  
+  if (activeTab === "enrollment") {
+    if (level1Done) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full text-center fade-in">
+          <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6" aria-hidden="true">
+            <BadgeCheck className="w-10 h-10 text-emerald-500" />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">Voter Avatar Unlocked!</h2>
+          <p className="text-neutral-400 mb-8 max-w-md">
+            You've successfully gathered all required documents. You are now ready to explore candidates.
+          </p>
+          <button
+            onClick={() => setActiveTab("discovery")}
+            className="bg-white text-black px-6 py-3 rounded-xl font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
+            aria-label="Proceed to Manifesto Followed"
+            id="btn-proceed-discovery"
+          >
+            Manifesto Followed
+          </button>
+        </div>
+      );
+    }
+    return <EnrollmentMission onComplete={() => setLevel1Done(true)} />;
+  }
+
+  if (activeTab === "discovery") return <div className="h-full pt-8"><CandidateDiscovery /></div>;
+  if (activeTab === "manifesto-tracker") return <div className="h-full pt-8"><ManifestoTracker /></div>;
+  if (activeTab === "learn") return <div className="h-full pt-8"><LearnElectionProcess onComplete={() => setIsBadgeEarned(true)} /></div>;
+  if (activeTab === "fraud") return <div className="h-full pt-8"><SubmitFraud /></div>;
+  if (activeTab === "timeline") return <div className="h-full pt-8 pb-12"><ElectionTimeline /></div>;
+  if (activeTab === "assets") return <div className="h-full pt-8 pb-12"><AssetDetails /></div>;
+  if (activeTab === "declare-assets") return <div className="h-full pt-8 pb-12"><AssetDeclarationForm /></div>;
+  if (activeTab === "know-better") return <div className="h-full pt-8 pb-12"><KnowBetter /></div>;
+
+  return null;
+}
+
+/**
  * Dashboard Component
  *
  * Orchestrates the primary user interface post-authentication.
@@ -315,85 +367,13 @@ function Dashboard(): React.ReactElement {
           id={`panel-${activeTab}`}
         >
           <Suspense fallback={<PageLoader />}>
-            {activeTab === "manifesto" && <ManifestoManager />}
-            {activeTab === "enrollment" &&
-              (level1Done ? (
-                <div className="flex flex-col items-center justify-center h-full text-center fade-in">
-                  <div
-                    className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6"
-                    aria-hidden="true"
-                  >
-                    <BadgeCheck className="w-10 h-10 text-emerald-500" />
-                  </div>
-                  <h2 className="text-2xl font-bold mb-2">
-                    Voter Avatar Unlocked!
-                  </h2>
-                  <p className="text-neutral-400 mb-8 max-w-md">
-                    You've successfully gathered all required documents. You are
-                    now ready to explore candidates.
-                  </p>
-                  <button
-                    onClick={() => setActiveTab("discovery")}
-                    className="bg-white text-black px-6 py-3 rounded-xl font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
-                    aria-label="Proceed to Manifesto Followed"
-                    id="btn-proceed-discovery"
-                  >
-                    Manifesto Followed
-                  </button>
-                </div>
-              ) : (
-                <EnrollmentMission onComplete={() => setLevel1Done(true)} />
-              ))}
-
-            {activeTab === "discovery" && (
-              <div className="h-full pt-8">
-                <CandidateDiscovery />
-              </div>
-            )}
-
-            {activeTab === "manifesto-tracker" && (
-              <div className="h-full pt-8">
-                <ManifestoTracker />
-              </div>
-            )}
-
-            {activeTab === "learn" && (
-              <div className="h-full pt-8">
-                <LearnElectionProcess
-                  onComplete={() => setIsBadgeEarned(true)}
-                />
-              </div>
-            )}
-
-            {activeTab === "fraud" && (
-              <div className="h-full pt-8">
-                <SubmitFraud />
-              </div>
-            )}
-
-            {activeTab === "timeline" && (
-              <div className="h-full pt-8 pb-12">
-                <ElectionTimeline />
-              </div>
-            )}
-
-            {activeTab === "assets" && (
-              <div className="h-full pt-8 pb-12">
-                <AssetDetails />
-              </div>
-            )}
-
-            {activeTab === "declare-assets" && (
-              <div className="h-full pt-8 pb-12">
-                <AssetDeclarationForm />
-              </div>
-            )}
-
-            {activeTab === "know-better" && (
-              <div className="h-full pt-8 pb-12">
-                <KnowBetter />
-              </div>
-            )}
+            <TabContent 
+              activeTab={activeTab} 
+              level1Done={level1Done} 
+              setLevel1Done={setLevel1Done} 
+              setActiveTab={setActiveTab} 
+              setIsBadgeEarned={setIsBadgeEarned} 
+            />
           </Suspense>
         </section>
 
