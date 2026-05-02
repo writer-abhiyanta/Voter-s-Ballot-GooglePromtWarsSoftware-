@@ -16,9 +16,11 @@ export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const storage = getStorage(app);
 
 // Demonstrate Enterprise synergy: AppCheck implementation for Zero-Trust defense
+// In a true production environment, this would be enabled with a valid ReCaptcha key.
+// Disabled in the AI Studio preview to prevent "client is offline" connection drops.
 try {
   // @ts-ignore
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production' && false) {
     initializeAppCheck(app, {
       provider: new ReCaptchaEnterpriseProvider('6Lc_enterprise_mock_key'),
       isTokenAutoRefreshEnabled: true
