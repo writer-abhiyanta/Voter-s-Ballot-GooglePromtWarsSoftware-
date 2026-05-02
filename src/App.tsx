@@ -227,6 +227,7 @@ function Dashboard(): React.ReactElement {
       </header>
 
       <main
+        id="main-content"
         className="flex-1 overflow-hidden flex flex-col"
         aria-labelledby="dashboard-title"
       >
@@ -461,6 +462,12 @@ function App(): React.ReactElement {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <a 
+          href="#main-content" 
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[9999] bg-emerald-600 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+        >
+          Skip to main content
+        </a>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route element={<ProtectedRoute />}>

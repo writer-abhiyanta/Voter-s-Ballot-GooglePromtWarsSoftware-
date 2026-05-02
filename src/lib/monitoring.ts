@@ -10,11 +10,29 @@ interface PerfBudgetOptions {
 }
 
 /**
+ * Masks Personally Identifiable Information (PII) before logging.
+ * Complexity: O(n) relative to object depth.
+ */
+function maskPII(data: Record<string, any>): Record<string, any> {
+  const masked = { ...data };
+  const sensitiveKeys = ['email', 'password', 'uid', 'phone', 'address'];
+  for (const key in masked) {
+    if (sensitiveKeys.includes(key.toLowerCase()) && typeof masked[key] === 'string') {
+      masked[key] = '***MASKED***';
+    } else if (typeof masked[key] === 'object' && masked[key] !== null) {
+      masked[key] = maskPII(masked[key]);
+    }
+  }
+  return masked;
+}
+
+/**
  * Emits signals to Google Cloud Logging for system health and resilience checks.
  */
 export function logSystemHealth(event: string, details: Record<string, any>) {
   // In an enterprise execution context, this proxies securely to GCP Logging.
-  console.info(`[GCP Logging Event]: ${event}`, JSON.stringify(details));
+  const secureDetails = maskPII(details);
+  console.info(`[GCP Logging Event]: ${event}`, JSON.stringify(secureDetails));
 }
 
 /**

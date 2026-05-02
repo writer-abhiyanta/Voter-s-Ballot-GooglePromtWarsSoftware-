@@ -9,6 +9,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { generateVoterInsight } from "../services/ai";
+import { CANDIDATES, QUIZ_QUESTIONS } from "../lib/discoveryConstants";
 
 /**
  * Interface representing a conceptual political candidate.
@@ -27,98 +28,6 @@ interface Candidate {
   imageUrl: string;
   matchScore: number;
 }
-
-const CANDIDATES: Candidate[] = [
-  {
-    id: "1",
-    name: "oiela quarter",
-    party: "Progressive Future",
-    education: "MSc Public Policy, Oxford",
-    experience: "City Council (4 yrs), Tech Entrepreneur",
-    manifesto: [
-      "100% Renewable Energy by 2030",
-      "Free Universal Pre-K",
-      "Modernize Public Transit Network",
-    ],
-    assets: "$1.2M",
-    liabilities: "$300K",
-    criminalRecord: "None",
-    performance: "Passed 12 local ordinances, 95% attendance rate.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop",
-    matchScore: 0,
-  },
-  {
-    id: "2",
-    name: "tony dragon",
-    party: "Civic Alliance",
-    education: "JD, Harvard Law",
-    experience: "District Attorney (8 yrs)",
-    manifesto: [
-      "Comprehensive Tax Reform",
-      "Increase Teacher Salaries",
-      "Expand Small Business Grants",
-    ],
-    assets: "$2.5M",
-    liabilities: "$150K",
-    criminalRecord: "None",
-    performance:
-      "Cleared historic case backlog, implemented community policing.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=600&auto=format&fit=crop",
-    matchScore: 0,
-  },
-  {
-    id: "3",
-    name: "moka sandrek",
-    party: "Green Coalition",
-    education: "PhD Environmental Science",
-    experience: "NGO Director, Climate Activist",
-    manifesto: [
-      "Stop Urban Sprawl",
-      "Protect Local Watersheds",
-      "Implement City-wide Composting",
-    ],
-    assets: "$800K",
-    liabilities: "$50K",
-    criminalRecord: "1 Misdemeanor (Protest-related)",
-    performance: "Led successful campaign to ban single-use plastics locally.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop",
-    matchScore: 0,
-  },
-];
-
-/**
- * Interface representing a quiz question to determine voter alignment.
- */
-interface QuizQuestion {
-  text: string;
-  alignment: { [candidateId: string]: number };
-}
-
-const QUIZ_QUESTIONS: QuizQuestion[] = [
-  {
-    text: "We need to rapidly transition to 100% Renewable Energy.",
-    alignment: { "1": 1, "2": 0, "3": 1 },
-  },
-  {
-    text: "Comprehensive tax reform and business growth should be our top priorities.",
-    alignment: { "1": -0.5, "2": 1, "3": -0.5 },
-  },
-  {
-    text: "The city must invest heavily in modernizing public transit.",
-    alignment: { "1": 1, "2": 0, "3": 0.5 },
-  },
-  {
-    text: "Protecting watersheds and stopping urban sprawl is more important than rapid development.",
-    alignment: { "1": 0.5, "2": -0.5, "3": 1 },
-  },
-  {
-    text: "Public funds should be used to guarantee free universal Pre-K.",
-    alignment: { "1": 1, "2": 0.5, "3": 0 },
-  },
-];
 
 /** Type representing the current state of the discovery process. */
 type Phase = "intro" | "quiz" | "discovery";

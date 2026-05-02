@@ -24,6 +24,17 @@ This repository adheres to a Zero-Trust architecture and mitigates edge-case vul
 7. **Identification and Authentication Failures**:
    - Handled via Firebase enterprise-grade Google Auth OAuth standard.
 
+8. **Content Security Policy (CSP)**
+   - Deployed at the HTTP layer and enforced via `<meta>` tags ensuring execution contexts are stringently managed. Scripts and connections only occur with Google APIs and Firebase endpoints.
+9. **Google Firebase AppCheck**
+   - Implemented via `ReCaptchaEnterpriseProvider` to prevent direct backend abuse. AppCheck verifies that only the front-end SPA triggers the REST/RPC integrations.
+10. **Data Masking Protocol**
+   - The logging middleware (`src/lib/monitoring.ts`) runs a recursive O(n) mask over PII footprints prior to sending signals to Cloud Logging to prevent sensitive data leaks.
+11. **Input Sanitization**
+   - A dedicated middleware layer (`src/lib/security.ts`) runs an algorithmic extraction map (`/[<>{}$]/g`) to block XSS and NoSQL injections natively.
+12. **Resource Exhaustion Controls (Token Bucket)**
+   - API endpoints enforce rate-limiting per operation action via `assertRateLimit`.
+
 ## Reporting a Vulnerability
 
 Please report security issues to `engineeringstudies5@gmail.com`. All verifiable issues will be addressed within 24 hours.

@@ -1,6 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { sanitizeInput, assertRateLimit } from "../lib/security";
 import { withPerformanceBudget, logSystemHealth } from "../lib/monitoring";
+import { withCache } from "../lib/cache";
 
 // Initialize the Gemini client lazily
 
@@ -124,40 +125,48 @@ export async function generateVoterInsight(
   topCandidateName: string,
   alignmentDescriptions: string[],
 ) {
-  try {
-    const ai = getAIClient();
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: [
-        {
-          role: "user",
-          parts: [
+  return withPerformanceBudget(
+    () => withCache(
+      `insight_${topCandidateName}_${alignmentDescriptions.length}`,
+      300000,
+      async () => {
+        assertRateLimit('voter_insight', 20, 60000);
+        const ai = getAIClient();
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: [
             {
-              text: `You are an unbiased political analyst. A voter has just finished a matchmaking quiz and their top candidate is ${topCandidateName}. 
+              role: "user",
+              parts: [
+                {
+                  text: `You are an unbiased political analyst. A voter has just finished a matchmaking quiz and their top candidate is ${topCandidateName}. 
 Based on their alignment on these issues:
 ${alignmentDescriptions.join("\n")}
 
 Generate a concise, 2-to-3 sentence analytical summary explaining why this candidate is a strong match for them and what core philosophy they share.`,
+                },
+              ],
             },
           ],
-        },
-      ],
-      config: {
-        maxOutputTokens: 256,
-        temperature: 0.7,
-      },
-    });
-    return (
-      response.text || "You are highly aligned with " + topCandidateName + "."
-    );
-  } catch (err) {
+          config: {
+            maxOutputTokens: 256,
+            temperature: 0.7,
+          },
+        });
+        return (
+          response.text || "You are highly aligned with " + topCandidateName + "."
+        );
+      }
+    ),
+    { actionName: "generateVoterInsight_L1", maxDurationMs: 5000 }
+  ).catch((err) => {
     // Secure boundary: prevent leak
     return (
       "You have successfully matched with " +
       topCandidateName +
       " based on your core values. Contact their campaign space to learn more!"
     );
-  }
+  });
 }
 
 /**
