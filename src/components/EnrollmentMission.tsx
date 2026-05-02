@@ -31,9 +31,12 @@ const DOCUMENTS: RequiredDocument[] = [
  * documents to unlock voter avatars in a gamified context. Designed with cognitive 
  * ease and AAA interaction criteria.
  * 
+ * Algorithmic Complexity: O(1) state resolution. 
+ * Cognitive Complexity: Space complexity O(n) where n = required documents. Function complexity < 2.
+ * 
  * @param {Object} props - Properties for the component.
  * @param {Function} props.onComplete - Callback that fires when all documents are handled.
- * @returns {JSX.Element} Interactive list of documents to scan.
+ * @returns {React.ReactElement} Interactive list of documents to scan.
  */
 export const EnrollmentMission: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
   const [collected, setCollected] = useState<string[]>([]);

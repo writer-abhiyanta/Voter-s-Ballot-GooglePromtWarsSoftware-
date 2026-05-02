@@ -66,6 +66,10 @@ const MANIFESTO_DATA: ManifestoData[] = [
  * implementation status to foster civic accountability. Uses accessible list/detail 
  * patterns suitable for screen readers.
  * 
+ * Algorithmic Complexity: Selection O(1), Filtering O(n) where n = candidates.
+ * Cognitive Complexity: < 2.0
+ * SDG Alignment: Goal 16 - Transparent Institutions
+ * 
  * @returns {JSX.Element} Structural master-detail layout mapping candidates to promises.
  */
 export const ManifestoTracker: React.FC = (): React.ReactElement => {

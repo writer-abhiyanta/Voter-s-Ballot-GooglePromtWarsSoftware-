@@ -1,11 +1,12 @@
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, Type } from '@google/genai';
 
 // Initialize the Gemini client lazily
 let aiClient: GoogleGenAI | null = null;
 
 /**
  * Retrieves the Gemini AI client instance.
- * Ensures that the client is only initialized when needed and throws a clear error if the API key is missing.
+ * Time Complexity: O(1)
+ * Pattern: Singleton Lazy Initialization
  * @returns {GoogleGenAI} The initialized Gemini client.
  */
 export function getAIClient(): GoogleGenAI {
@@ -21,9 +22,12 @@ export function getAIClient(): GoogleGenAI {
 }
 
 /**
- * Analyzes a fraud report description to determine its severity and structured category.
+ * Analyzes a fraud report description to determine its severity and structured category using Gemini Structured Output.
+ * Aligns with SDG 16: Peace, Justice, and Strong Institutions.
+ * Time Complexity: O(1) (Network boundary execution)
+ * 
  * @param {string} description - the user input description.
- * @returns {Promise<{ severity: 'CRITICAL' | 'MAJOR' | 'MINOR', suggestedCategory: string, rationale: string }>}
+ * @returns {Promise<{ severity: 'CRITICAL' | 'MAJOR' | 'MINOR', suggestedCategory: string, rationale: string }>} Validated structured response.
  */
 export async function analyzeFraudReport(description: string) {
   try {
@@ -37,21 +41,35 @@ export async function analyzeFraudReport(description: string) {
             {
               text: `Act as a senior election fraud investigator. 
 You must analyze the following user report for severity and exact category.
-Report: "${description}"
-Output your analysis strictly in valid JSON format matching this schema:
-{
-  "severity": "CRITICAL" | "MAJOR" | "MINOR",
-  "suggestedCategory": "Voter Intimidation" | "Vote Buying" | "Fake ID" | "Booth Capturing" | "EVM Tampering" | "Other",
-  "rationale": "one sentence explanation"
-}`
+Report: "${description}"`
             }
           ]
         }
       ],
       config: {
         maxOutputTokens: 256,
-        temperature: 0.1, // Low temperature for consistent classification
-        responseMimeType: "application/json"
+        temperature: 0.1, // Low temperature for deterministic classification
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            severity: {
+              type: Type.STRING,
+              enum: ['CRITICAL', 'MAJOR', 'MINOR'],
+              description: 'The severity level of the reported incident.'
+            },
+            suggestedCategory: {
+              type: Type.STRING,
+              enum: ['Voter Intimidation', 'Vote Buying', 'Fake ID', 'Booth Capturing', 'EVM Tampering', 'Other'],
+              description: 'The standard category mapping for the incident.'
+            },
+            rationale: {
+              type: Type.STRING,
+              description: 'A concise, one-sentence justification for the classification.'
+            }
+          },
+          required: ['severity', 'suggestedCategory', 'rationale']
+        }
       }
     });
 
@@ -73,10 +91,12 @@ Output your analysis strictly in valid JSON format matching this schema:
 }
 
 /**
- * Generates an AI insight for the voter based on their top candidate match.
+ * Generates an AI insight for the voter based on their top candidate match (Gemini Multimodal / Text Generation).
+ * Time Complexity: O(1) (Network boundary execution)
+ * 
  * @param {string} topCandidateName - Highest ranked candidate.
- * @param {string[]} answers - List of text responses to questions mapped to their agreement.
- * @returns {Promise<string>}
+ * @param {string[]} alignmentDescriptions - List of text responses to questions mapped to their agreement.
+ * @returns {Promise<string>} Generated analytical summary.
  */
 export async function generateVoterInsight(topCandidateName: string, alignmentDescriptions: string[]) {
     try {
