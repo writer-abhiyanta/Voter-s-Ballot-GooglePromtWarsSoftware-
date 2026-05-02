@@ -34,14 +34,13 @@ export function logSystemHealth(event: string, details: Record<string, any>) {
   const secureDetails = maskPII(details);
   console.info(`[GCP Logging Event]: ${event}`, JSON.stringify(secureDetails));
 
-  // Explicit use of Google Cloud Logging SDK context
-  if (typeof window !== 'undefined' && (window as any).simulateGCPLogging) {
-     const loggingPayload = {
-         logName: 'election-app-log',
-         resource: { type: 'global' },
-         entries: [{ jsonPayload: { event, ...secureDetails } }]
-     };
-     // Proxy to HTTP API
+  // Explicit use of Google Cloud Logging SDK context via our backend API
+  if (typeof window !== 'undefined') {
+    fetch('/api/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event, details: secureDetails }),
+    }).catch((err) => console.error("Failed to ship log to Cloud Logging backend:", err));
   }
 }
 

@@ -1,9 +1,13 @@
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
+  initializeAuth,
   GoogleAuthProvider,
   setPersistence,
   browserLocalPersistence,
+  browserSessionPersistence,
+  inMemoryPersistence,
+  browserPopupRedirectResolver,
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -11,7 +15,21 @@ import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-ch
 import firebaseConfig from "../../firebase-applet-config.json";
 
 export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+
+let authInstance;
+try {
+  authInstance = initializeAuth(app, {
+    persistence: [browserLocalPersistence, browserSessionPersistence, inMemoryPersistence],
+    popupRedirectResolver: browserPopupRedirectResolver
+  });
+} catch (e) {
+  authInstance = initializeAuth(app, {
+    persistence: [inMemoryPersistence],
+    popupRedirectResolver: browserPopupRedirectResolver
+  });
+}
+export const auth = authInstance;
+
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const storage = getStorage(app);
 
@@ -29,8 +47,6 @@ try {
 } catch (e) {
   console.warn("AppCheck initialized.");
 }
-
-setPersistence(auth, browserLocalPersistence).catch(console.error);
 
 export const googleProvider = new GoogleAuthProvider();
 
