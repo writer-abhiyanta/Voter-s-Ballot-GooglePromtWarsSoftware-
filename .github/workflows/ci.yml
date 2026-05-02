@@ -36,8 +36,12 @@ jobs:
         NODE_ENV: production
         CI: true
 
-    - name: Mutation & Coverage Verification
-      run: echo "Mutation testing passed against defined specifications."
+    - name: Mutation & Coverage Verification (Vitest)
+      run: npm run test:coverage
+
+    - name: E2E Playwright Verification
+      run: npm run test:e2e
 
     - name: Lighthouse & Accessibility Checks
-      run: echo "Lighthouse score 100/100 verified via AI testing orchestrator."
+      run: npm run lighthouse
+

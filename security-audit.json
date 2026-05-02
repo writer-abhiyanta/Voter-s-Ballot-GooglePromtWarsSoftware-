@@ -1,0 +1,18 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {},
+  "metadata": {
+    "dependencies": 156,
+    "devDependencies": 42,
+    "optionalDependencies": 0,
+    "totalDependencies": 198
+  },
+  "summary": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  }
+}

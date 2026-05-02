@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { BadgeCheck, FileText, Camera, MapPin } from 'lucide-react';
-import confetti from 'canvas-confetti';
-import { useAuth } from './AuthProvider';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { BadgeCheck, FileText, Camera, MapPin } from "lucide-react";
+import confetti from "canvas-confetti";
+import { useAuth } from "./AuthProvider";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 
 /**
  * Interface mapping out required documents for the enrollment mission.
@@ -19,26 +19,49 @@ interface RequiredDocument {
 }
 
 const DOCUMENTS: RequiredDocument[] = [
-  { id: 'id', title: 'Identity Proof', icon: BadgeCheck, desc: 'Aadhar, PAN, or Passport', color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-  { id: 'address', title: 'Address Proof', icon: MapPin, desc: 'Utility bill or Rent agreement', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-  { id: 'age', title: 'Age Declaration', icon: FileText, desc: 'Form 6 for 18+ verification', color: 'text-green-400', bg: 'bg-green-400/10' }
+  {
+    id: "id",
+    title: "Identity Proof",
+    icon: BadgeCheck,
+    desc: "Aadhar, PAN, or Passport",
+    color: "text-emerald-400",
+    bg: "bg-emerald-400/10",
+  },
+  {
+    id: "address",
+    title: "Address Proof",
+    icon: MapPin,
+    desc: "Utility bill or Rent agreement",
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+  },
+  {
+    id: "age",
+    title: "Age Declaration",
+    icon: FileText,
+    desc: "Form 6 for 18+ verification",
+    color: "text-green-400",
+    bg: "bg-green-400/10",
+  },
 ];
 
 /**
  * Enrollment Mission Component
- * 
+ *
  * Simulates a document scanning mission for a user. Helps users gather necessary
- * documents to unlock voter avatars in a gamified context. Designed with cognitive 
+ * documents to unlock voter avatars in a gamified context. Designed with cognitive
  * ease and AAA interaction criteria.
- * 
- * Algorithmic Complexity: O(1) state resolution. 
+ *
+ * Algorithmic Complexity: O(1) state resolution.
  * Cognitive Complexity: Space complexity O(n) where n = required documents. Function complexity < 2.
- * 
+ *
  * @param {Object} props - Properties for the component.
  * @param {Function} props.onComplete - Callback that fires when all documents are handled.
  * @returns {React.ReactElement} Interactive list of documents to scan.
  */
-export const EnrollmentMission: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
+export const EnrollmentMission: React.FC<{ onComplete: () => void }> = ({
+  onComplete,
+}) => {
   const [collected, setCollected] = useState<string[]>([]);
   const [scanning, setScanning] = useState<string | null>(null);
   const { user } = useAuth();
@@ -46,7 +69,7 @@ export const EnrollmentMission: React.FC<{ onComplete: () => void }> = ({ onComp
   /**
    * Triggers the simulated optical scanning of a document.
    * Modifies component state and checks for completion conditions.
-   * 
+   *
    * @param {string} id - The unique identifier of the document being scanned.
    */
   const handleCollect = (id: string): void => {
@@ -57,14 +80,14 @@ export const EnrollmentMission: React.FC<{ onComplete: () => void }> = ({ onComp
       if (!collected.includes(id)) {
         const newCollected = [...collected, id];
         setCollected(newCollected);
-        
+
         // Minor visual feedback: confetti pop for finding an item
         confetti({
           particleCount: 30,
           spread: 60,
           origin: { y: 0.8 },
-          colors: ['#10b981', '#14b8a6', '#22c55e'],
-          shapes: ['square']
+          colors: ["#10b981", "#14b8a6", "#22c55e"],
+          shapes: ["square"],
         });
 
         if (newCollected.length === DOCUMENTS.length) {
@@ -85,34 +108,47 @@ export const EnrollmentMission: React.FC<{ onComplete: () => void }> = ({ onComp
       spread: 100,
       origin: { y: 0.5 },
       zIndex: 9999,
-      colors: ['#10b981', '#14b8a6', '#22c55e', '#059669', '#34d399'],
-      shapes: ['square']
+      colors: ["#10b981", "#14b8a6", "#22c55e", "#059669", "#34d399"],
+      shapes: ["square"],
     });
 
     if (user) {
       try {
-        const userRef = doc(db, 'users', user.uid);
+        const userRef = doc(db, "users", user.uid);
         await updateDoc(userRef, {
           level1Completed: true,
           points: 100, // Award initial gamified points
-          updatedAt: serverTimestamp()
+          updatedAt: serverTimestamp(),
         });
       } catch (e) {
         handleFirestoreError(e, OperationType.UPDATE, `users/${user.uid}`);
       }
     }
-    
+
     // Defer the UI transition to let confeti run
     setTimeout(onComplete, 3000);
   };
 
-  const progressPercent = Math.round((collected.length / DOCUMENTS.length) * 100);
+  const progressPercent = Math.round(
+    (collected.length / DOCUMENTS.length) * 100,
+  );
 
   return (
-    <section className="max-w-md mx-auto h-[calc(100vh-80px)] flex flex-col pt-8" aria-labelledby="mission-title">
+    <section
+      className="max-w-md mx-auto h-[calc(100vh-80px)] flex flex-col pt-8"
+      aria-labelledby="mission-title"
+    >
       <header className="mb-8">
-        <h2 id="mission-title" className="text-3xl font-bold text-white mb-2 tracking-tight">The Enrollment Mission</h2>
-        <p className="text-neutral-400 text-sm">Find and scan the {DOCUMENTS.length} required documents to unlock your Voter Avatar.</p>
+        <h2
+          id="mission-title"
+          className="text-3xl font-bold text-white mb-2 tracking-tight"
+        >
+          The Enrollment Mission
+        </h2>
+        <p className="text-neutral-400 text-sm">
+          Find and scan the {DOCUMENTS.length} required documents to unlock your
+          Voter Avatar.
+        </p>
       </header>
 
       <div className="flex-1 space-y-4" role="list">
@@ -129,16 +165,19 @@ export const EnrollmentMission: React.FC<{ onComplete: () => void }> = ({ onComp
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className={`relative overflow-hidden rounded-2xl border p-4 transition-colors duration-500 ${
-                isCollected 
-                  ? 'bg-emerald-500/10 border-emerald-500/40' 
-                  : 'bg-neutral-900 border-neutral-800'
+                isCollected
+                  ? "bg-emerald-500/10 border-emerald-500/40"
+                  : "bg-neutral-900 border-neutral-800"
               }`}
             >
               <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${docItem.bg}`} aria-hidden="true">
+                <div
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${docItem.bg}`}
+                  aria-hidden="true"
+                >
                   <Icon className={`w-6 h-6 ${docItem.color}`} />
                 </div>
-                
+
                 <div className="flex-1">
                   <h3 className="text-white font-medium">{docItem.title}</h3>
                   <p className="text-neutral-500 text-xs">{docItem.desc}</p>
@@ -147,22 +186,32 @@ export const EnrollmentMission: React.FC<{ onComplete: () => void }> = ({ onComp
                 <div className="shrink-0">
                   {isCollected ? (
                     <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                      <BadgeCheck className="w-8 h-8 text-emerald-500" aria-label={`Successfully scanned ${docItem.title}`} />
+                      <BadgeCheck
+                        className="w-8 h-8 text-emerald-500"
+                        aria-label={`Successfully scanned ${docItem.title}`}
+                      />
                     </motion.div>
                   ) : (
                     <button
                       onClick={() => handleCollect(docItem.id)}
                       disabled={isScanning || !!scanning}
-                      aria-label={isScanning ? `Scanning ${docItem.title}...` : `Initialize scan for ${docItem.title}`}
+                      aria-label={
+                        isScanning
+                          ? `Scanning ${docItem.title}...`
+                          : `Initialize scan for ${docItem.title}`
+                      }
                       className={`relative w-12 h-12 rounded-full flex items-center justify-center border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 ${
-                        isScanning 
-                          ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10' 
-                          : 'border-neutral-700 text-neutral-400 hover:text-white hover:border-neutral-500'
+                        isScanning
+                          ? "border-emerald-500 text-emerald-400 bg-emerald-500/10"
+                          : "border-neutral-700 text-neutral-400 hover:text-white hover:border-neutral-500"
                       }`}
                     >
                       <Camera className="w-5 h-5" aria-hidden="true" />
                       {isScanning && (
-                         <div className="absolute inset-0 rounded-full border-t-2 border-emerald-500 animate-spin" aria-hidden="true" />
+                        <div
+                          className="absolute inset-0 rounded-full border-t-2 border-emerald-500 animate-spin"
+                          aria-hidden="true"
+                        />
                       )}
                     </button>
                   )}
@@ -171,9 +220,9 @@ export const EnrollmentMission: React.FC<{ onComplete: () => void }> = ({ onComp
 
               {/* Scanning visual effect */}
               {isScanning && (
-                <motion.div 
-                  initial={{ top: '-100%' }}
-                  animate={{ top: '200%' }}
+                <motion.div
+                  initial={{ top: "-100%" }}
+                  animate={{ top: "200%" }}
                   transition={{ duration: 1.5, ease: "linear" }}
                   className="absolute left-0 w-full h-8 bg-gradient-to-b from-transparent via-emerald-500/20 to-transparent blur-sm z-10"
                   aria-hidden="true"
@@ -186,15 +235,32 @@ export const EnrollmentMission: React.FC<{ onComplete: () => void }> = ({ onComp
 
       <footer className="mt-auto mb-8 bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex items-center justify-between">
         <div aria-live="polite">
-          <p className="text-neutral-400 text-xs uppercase tracking-wider mb-1" id="progress-label">Progress</p>
-          <div className="flex items-baseline gap-1" aria-labelledby="progress-label">
-            <span className="text-2xl font-bold text-white">{collected.length}</span>
+          <p
+            className="text-neutral-400 text-xs uppercase tracking-wider mb-1"
+            id="progress-label"
+          >
+            Progress
+          </p>
+          <div
+            className="flex items-baseline gap-1"
+            aria-labelledby="progress-label"
+          >
+            <span className="text-2xl font-bold text-white">
+              {collected.length}
+            </span>
             <span className="text-neutral-500">/ {DOCUMENTS.length}</span>
           </div>
         </div>
-        <div className="flex-1 max-w-[120px]" role="progressbar" aria-valuenow={progressPercent} aria-valuemin={0} aria-valuemax={100} aria-label={`Mission Progress: ${progressPercent}%`}>
+        <div
+          className="flex-1 max-w-[120px]"
+          role="progressbar"
+          aria-valuenow={progressPercent}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Mission Progress: ${progressPercent}%`}
+        >
           <div className="h-2 bg-neutral-800 rounded-full overflow-hidden">
-            <motion.div 
+            <motion.div
               className="h-full bg-gradient-to-r from-teal-500 to-emerald-500"
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
