@@ -8,8 +8,8 @@ export const ProtectedRoute: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-4">
-        <div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mb-4" />
-        <p className="text-neutral-400 font-mono text-sm">You are designing into verified informed voter...</p>
+        <div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mb-4" role="status" aria-label="Loading..." />
+        <p className="text-neutral-400 font-mono text-sm" aria-live="polite">You are logging into verified informed voter...</p>
       </div>
     );
   }

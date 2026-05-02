@@ -172,28 +172,28 @@ export default function ManifestoManager() {
              {isEditingProfile ? (
                <div className="space-y-4">
                  <div>
-                   <label className="block text-xs font-medium text-neutral-400 mb-1">Full Name</label>
-                   <input type="text" value={profile?.name} onChange={e => setProfile(p => ({...p!, name: e.target.value}))} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" />
+                   <label htmlFor="profile-name" className="block text-xs font-medium text-neutral-400 mb-1">Full Name</label>
+                   <input id="profile-name" type="text" value={profile?.name} onChange={e => setProfile(p => ({...p!, name: e.target.value}))} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                  </div>
                  <div>
-                   <label className="block text-xs font-medium text-neutral-400 mb-1">Party</label>
-                   <input type="text" value={profile?.party} onChange={e => setProfile(p => ({...p!, party: e.target.value}))} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" />
+                   <label htmlFor="profile-party" className="block text-xs font-medium text-neutral-400 mb-1">Party</label>
+                   <input id="profile-party" type="text" value={profile?.party} onChange={e => setProfile(p => ({...p!, party: e.target.value}))} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                  </div>
                  <div>
-                   <label className="block text-xs font-medium text-neutral-400 mb-1">Education</label>
-                   <input type="text" value={profile?.education} onChange={e => setProfile(p => ({...p!, education: e.target.value}))} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" />
+                   <label htmlFor="profile-education" className="block text-xs font-medium text-neutral-400 mb-1">Education</label>
+                   <input id="profile-education" type="text" value={profile?.education} onChange={e => setProfile(p => ({...p!, education: e.target.value}))} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                  </div>
                  <div>
-                   <label className="block text-xs font-medium text-neutral-400 mb-1">Experience (short)</label>
-                   <input type="text" value={profile?.experience} onChange={e => setProfile(p => ({...p!, experience: e.target.value}))} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" />
+                   <label htmlFor="profile-experience" className="block text-xs font-medium text-neutral-400 mb-1">Experience (short)</label>
+                   <input id="profile-experience" type="text" value={profile?.experience} onChange={e => setProfile(p => ({...p!, experience: e.target.value}))} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                  </div>
                  <div>
-                   <label className="block text-xs font-medium text-neutral-400 mb-1">Image URL</label>
-                   <input type="text" value={profile?.imageUrl} onChange={e => setProfile(p => ({...p!, imageUrl: e.target.value}))} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500" />
+                   <label htmlFor="profile-image" className="block text-xs font-medium text-neutral-400 mb-1">Image URL</label>
+                   <input id="profile-image" type="text" value={profile?.imageUrl} onChange={e => setProfile(p => ({...p!, imageUrl: e.target.value}))} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                  </div>
                  <div>
-                   <label className="block text-xs font-medium text-neutral-400 mb-1">Past Performance / Quote</label>
-                   <textarea value={profile?.performance} onChange={e => setProfile(p => ({...p!, performance: e.target.value}))} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 resize-none h-20" />
+                   <label htmlFor="profile-performance" className="block text-xs font-medium text-neutral-400 mb-1">Past Performance / Quote</label>
+                   <textarea id="profile-performance" value={profile?.performance} onChange={e => setProfile(p => ({...p!, performance: e.target.value}))} className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none h-20" />
                  </div>
                  <button onClick={saveProfile} className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 rounded-lg flex items-center justify-center gap-2">
                    <Save className="w-4 h-4" /> Save Profile
@@ -223,18 +223,21 @@ export default function ManifestoManager() {
             <h3 className="text-lg font-bold mb-6">Promises & Implementation</h3>
             
             <div className="flex gap-2 mb-6">
+              <label htmlFor="new-manifesto-item" className="sr-only">New Manifesto Promise</label>
               <input 
+                 id="new-manifesto-item"
                  type="text" 
                  value={newItemText}
                  onChange={e => setNewItemText(e.target.value)}
                  onKeyDown={e => e.key === 'Enter' && addManifestoItem()}
                  placeholder="E.g., 100% Renewable Energy by 2030"
-                 className="flex-1 bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-500"
+                 className="flex-1 bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
               <button 
                 onClick={addManifestoItem}
                 disabled={!newItemText.trim()}
-                className="bg-white text-black px-4 rounded-xl font-medium disabled:opacity-50 hover:bg-neutral-200"
+                aria-label="Add manifesto item"
+                className="bg-white text-black px-4 rounded-xl font-medium disabled:opacity-50 hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
               >
                 <Plus className="w-5 h-5" />
               </button>
@@ -254,10 +257,12 @@ export default function ManifestoManager() {
                         <p className="text-white font-medium mb-2">{item.text}</p>
                      </div>
                      <div className="flex items-center gap-2">
+                        <label htmlFor={`status-${item.id}`} className="sr-only">Update status for {item.text}</label>
                         <select 
+                          id={`status-${item.id}`}
                           value={item.status}
                           onChange={(e) => updateItemStatus(item.id, e.target.value as any)}
-                          className={`text-xs font-medium px-3 py-1.5 rounded-lg border appearance-none cursor-pointer outline-none ${
+                          className={`text-xs font-medium px-3 py-1.5 rounded-lg border appearance-none cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 ${
                             item.status === 'completed' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
                             item.status === 'in-progress' ? 'bg-pink-500/10 border-pink-500/30 text-pink-400' :
                             'bg-fuchsia-500/10 border-fuchsia-500/30 text-fuchsia-400'
@@ -267,9 +272,10 @@ export default function ManifestoManager() {
                            <option value="in-progress">In Progress</option>
                            <option value="completed">Completed</option>
                         </select>
-                        <button 
+                         <button 
                           onClick={() => deleteItem(item.id)}
-                          className="p-2 text-neutral-500 hover:text-red-400 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          aria-label={`Delete manifesto item: ${item.text}`}
+                          className="p-2 text-neutral-500 hover:text-red-400 rounded-lg sm:opacity-0 sm:group-hover:opacity-100 transition-opacity focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                         >
                            <Trash2 className="w-4 h-4" />
                         </button>

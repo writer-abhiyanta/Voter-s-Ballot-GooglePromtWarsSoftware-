@@ -1,8 +1,29 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, Clock, Circle, Activity, ChevronRight, BarChart3 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { CheckCircle2, Clock, Circle, ChevronRight, BarChart3 } from 'lucide-react';
 
-const MANIFESTO_DATA = [
+/**
+ * Interface mapping individual promises mapped within a candidate's manifesto.
+ */
+interface ManifestoPromise {
+  id: string;
+  text: string;
+  status: 'completed' | 'in-progress' | 'todo';
+  update: string;
+}
+
+/**
+ * Interface for the manifesto data.
+ */
+interface ManifestoData {
+  id: string;
+  name: string;
+  party: string;
+  imageUrl: string;
+  promises: ManifestoPromise[];
+}
+
+const MANIFESTO_DATA: ManifestoData[] = [
   {
     id: '1',
     name: 'oiela quarter',
@@ -38,33 +59,46 @@ const MANIFESTO_DATA = [
   }
 ];
 
-export const ManifestoTracker: React.FC = () => {
+/**
+ * Manifesto Tracker Component
+ * 
+ * An interactive explorer allowing voters to parse candidate promises. Tracks 
+ * implementation status to foster civic accountability. Uses accessible list/detail 
+ * patterns suitable for screen readers.
+ * 
+ * @returns {JSX.Element} Structural master-detail layout mapping candidates to promises.
+ */
+export const ManifestoTracker: React.FC = (): React.ReactElement => {
   const [selectedCandidate, setSelectedCandidate] = useState<string | null>(MANIFESTO_DATA[0].id);
 
   const activeCandidate = MANIFESTO_DATA.find(c => c.id === selectedCandidate);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
-          <BarChart3 className="w-6 h-6 text-emerald-500" />
-          Manifesto
+    <section className="flex flex-col h-full" aria-labelledby="manifesto-title">
+      <header className="mb-8">
+        <h2 id="manifesto-title" className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+          <BarChart3 className="w-6 h-6 text-emerald-500" aria-hidden="true" />
+          Manifesto Implementations Tracker
         </h2>
         <p className="text-neutral-400">Track the progress of candidates' electoral promises and hold them accountable.</p>
-      </div>
+      </header>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
         {/* Candidates List */}
-        <div className="col-span-1 border border-neutral-800 rounded-2xl bg-neutral-900 overflow-hidden flex flex-col">
+        <nav className="col-span-1 border border-neutral-800 rounded-2xl bg-neutral-900 overflow-hidden flex flex-col" aria-label="Select a candidate to view their manifesto">
           <div className="p-4 border-b border-neutral-800 bg-neutral-950/50">
-            <h3 className="font-semibold text-neutral-300 uppercase tracking-wider text-xs">Select Candidate</h3>
+            <h3 className="font-semibold text-neutral-300 uppercase tracking-wider text-xs">Candidates</h3>
           </div>
-          <div className="overflow-y-auto flex-1 p-2 space-y-2">
+          <div className="overflow-y-auto flex-1 p-2 space-y-2" role="tablist" aria-orientation="vertical">
             {MANIFESTO_DATA.map(candidate => (
               <button
                 key={candidate.id}
+                role="tab"
+                id={`candidate-tab-${candidate.id}`}
+                aria-controls="manifesto-panel"
+                aria-selected={selectedCandidate === candidate.id}
                 onClick={() => setSelectedCandidate(candidate.id)}
-                className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${
+                className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 group ${
                   selectedCandidate === candidate.id 
                     ? 'bg-emerald-500/10 border border-emerald-500/30' 
                     : 'hover:bg-neutral-800 border border-transparent'
@@ -72,58 +106,70 @@ export const ManifestoTracker: React.FC = () => {
               >
                 <img 
                   src={candidate.imageUrl} 
-                  alt={candidate.name} 
+                  alt="" 
+                  aria-hidden="true"
                   className="w-12 h-12 rounded-full object-cover border border-neutral-700"
                 />
                 <div className="text-left flex-1 min-w-0">
-                  <h4 className="text-white font-medium truncate">{candidate.name}</h4>
+                  <h4 className="text-white font-medium truncate group-hover:text-emerald-400 transition-colors">{candidate.name}</h4>
                   <p className="text-xs text-emerald-400 truncate">{candidate.party}</p>
                 </div>
-                {selectedCandidate === candidate.id && <ChevronRight className="w-4 h-4 text-emerald-500" />}
+                {selectedCandidate === candidate.id && <ChevronRight className="w-4 h-4 text-emerald-500" aria-hidden="true" />}
               </button>
             ))}
           </div>
-        </div>
+        </nav>
 
         {/* Tracker View */}
-        <div className="col-span-1 md:col-span-2 border border-neutral-800 rounded-2xl bg-neutral-900 overflow-hidden flex flex-col relative py-2">
+        <section 
+          id="manifesto-panel"
+          className="col-span-1 md:col-span-2 border border-neutral-800 rounded-2xl bg-neutral-900 overflow-hidden flex flex-col relative py-2"
+          role="tabpanel"
+          aria-labelledby={activeCandidate ? `candidate-tab-${activeCandidate.id}` : undefined}
+          tabIndex={0}
+        >
           {activeCandidate && (
              <div className="p-6 h-full overflow-y-auto w-full">
-                <div className="flex items-center gap-4 mb-8">
+                <header className="flex items-center gap-4 mb-8">
                    <img 
                       src={activeCandidate.imageUrl} 
-                      alt={activeCandidate.name} 
+                      alt="" 
+                      aria-hidden="true"
                       className="w-20 h-20 rounded-2xl object-cover border border-neutral-700 shadow-lg"
                    />
                    <div>
                      <h3 className="text-2xl font-bold text-white mb-1">{activeCandidate.name}</h3>
                      <p className="text-emerald-400 font-medium">{activeCandidate.party} • Implementation Tracker</p>
                    </div>
-                </div>
+                </header>
 
-                <div className="space-y-4">
+                <div className="space-y-4" role="list" aria-label={`Promises by ${activeCandidate.name}`}>
                    {activeCandidate.promises.map((promise, index) => (
-                     <motion.div 
+                     <motion.article 
                        key={promise.id}
+                       role="listitem"
                        initial={{ opacity: 0, y: 10 }}
                        animate={{ opacity: 1, y: 0 }}
                        transition={{ delay: index * 0.1 }}
                        className="p-5 rounded-xl border border-neutral-800 bg-neutral-950 relative overflow-hidden group"
                      >
-                        <div className="absolute top-0 left-0 w-1 h-full bg-neutral-800 group-hover:bg-emerald-500/50 transition-colors" />
+                        <div className="absolute top-0 left-0 w-1 h-full bg-neutral-800 group-hover:bg-emerald-500/50 transition-colors" aria-hidden="true" />
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
                            <h4 className="text-lg font-medium text-white">{promise.text}</h4>
                            
                            {/* Status Badge */}
-                           <div className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap w-fit ${
+                           <div 
+                              className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 whitespace-nowrap w-fit ${
                              promise.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                              promise.status === 'in-progress' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' :
                              'bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20'
-                           }`}>
-                             {promise.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5" />}
-                             {promise.status === 'in-progress' && <Clock className="w-3.5 h-3.5" />}
-                             {promise.status === 'todo' && <Circle className="w-3.5 h-3.5" />}
-                             {promise.status === 'todo' ? 'Not Started' : promise.status.replace('-', ' ')}
+                           }`}
+                            aria-label={`Status: ${promise.status === 'todo' ? 'Not Started' : promise.status.replace('-', ' ')}`}
+                           >
+                             {promise.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />}
+                             {promise.status === 'in-progress' && <Clock className="w-3.5 h-3.5" aria-hidden="true" />}
+                             {promise.status === 'todo' && <Circle className="w-3.5 h-3.5" aria-hidden="true" />}
+                             <span aria-hidden="true">{promise.status === 'todo' ? 'Not Started' : promise.status.replace('-', ' ')}</span>
                            </div>
                         </div>
 
@@ -133,13 +179,13 @@ export const ManifestoTracker: React.FC = () => {
                             {promise.update}
                           </p>
                         </div>
-                     </motion.div>
+                     </motion.article>
                    ))}
                 </div>
              </div>
           )}
-        </div>
+        </section>
       </div>
-    </div>
+    </section>
   );
 };

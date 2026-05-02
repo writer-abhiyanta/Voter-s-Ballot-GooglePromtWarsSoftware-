@@ -95,7 +95,7 @@ const Login: React.FC = () => {
                <div className="w-2 h-0.5 bg-emerald-400"></div>
             </motion.div>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Voter's Ballot</h1>
+          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Voter's Ballot | Verified Informed Voter</h1>
           <p className="text-neutral-400 text-sm">Your journey to becoming an informed voter starts here.</p>
         </div>
 
@@ -111,26 +111,28 @@ const Login: React.FC = () => {
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <button
                   onClick={() => setSelectedRole('voter')}
-                  className={`relative p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all duration-200 ${
+                  aria-pressed={selectedRole === 'voter'}
+                  className={`relative p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 ${
                     selectedRole === 'voter' 
                       ? 'bg-emerald-500/10 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' 
                       : 'bg-emerald-950/40 border-emerald-900/50 hover:border-emerald-700/50'
                   }`}
                 >
-                  {selectedRole === 'voter' && <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-emerald-500" />}
-                  <User className={`w-8 h-8 ${selectedRole === 'voter' ? 'text-emerald-500' : 'text-emerald-700/50'}`} />
+                  {selectedRole === 'voter' && <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-emerald-500" aria-hidden="true" />}
+                  <User className={`w-8 h-8 ${selectedRole === 'voter' ? 'text-emerald-500' : 'text-emerald-700/50'}`} aria-hidden="true" />
                   <span className={`text-sm font-medium italic ${selectedRole === 'voter' ? 'text-emerald-400' : 'text-emerald-500/70'}`}>Indian Voter</span>
                 </button>
                 <button
                    onClick={() => setSelectedRole('anglo_voter')}
-                   className={`relative p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all duration-200 ${
+                   aria-pressed={selectedRole === 'anglo_voter'}
+                   className={`relative p-4 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900 ${
                     selectedRole === 'anglo_voter' 
                       ? 'bg-teal-500/10 border-teal-500 shadow-[0_0_15px_rgba(20,184,166,0.3)]' 
                       : 'bg-teal-950/40 border-teal-900/50 hover:border-teal-700/50'
                   }`}
                 >
-                  {selectedRole === 'anglo_voter' && <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-teal-500" />}
-                  <Users className={`w-8 h-8 ${selectedRole === 'anglo_voter' ? 'text-teal-500' : 'text-teal-700/50'}`} />
+                  {selectedRole === 'anglo_voter' && <CheckCircle2 className="absolute top-2 right-2 w-4 h-4 text-teal-500" aria-hidden="true" />}
+                  <Users className={`w-8 h-8 ${selectedRole === 'anglo_voter' ? 'text-teal-500' : 'text-teal-700/50'}`} aria-hidden="true" />
                   <span className={`text-sm font-medium italic ${selectedRole === 'anglo_voter' ? 'text-teal-400' : 'text-teal-500/70'}`}>Anglo Indian Voter</span>
                 </button>
               </div>
@@ -140,7 +142,7 @@ const Login: React.FC = () => {
         <button
           onClick={handleLogin}
           disabled={loading || !selectedRole}
-          className="w-full flex items-center justify-center gap-3 bg-white text-black py-3 px-4 rounded-xl font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-3 bg-white text-black py-3 px-4 rounded-xl font-medium hover:bg-neutral-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
         >
           {loading ? (
             <div className="w-5 h-5 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />

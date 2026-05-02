@@ -161,7 +161,10 @@ export const AssetDetails: React.FC = () => {
             </div>
             
             <div className="bg-neutral-800/30 p-4 border-t border-neutral-800 flex justify-end">
-              <button className="flex items-center gap-2 text-sm text-neutral-400 hover:text-emerald-400 transition-colors px-3 py-1.5 rounded border border-transparent hover:border-emerald-500/30 bg-neutral-800/50 hover:bg-emerald-500/10">
+              <button 
+                className="flex items-center gap-2 text-sm text-neutral-400 hover:text-emerald-400 transition-colors px-3 py-1.5 rounded border border-transparent hover:border-emerald-500/30 bg-neutral-800/50 hover:bg-emerald-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-900"
+                aria-label={`Report discrepancy for ${candidate.name}`}
+              >
                 <AlertTriangle className="w-4 h-4" />
                 Report Discrepancy
               </button>
