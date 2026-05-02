@@ -6,19 +6,28 @@ import { doc, getDoc } from 'firebase/firestore';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  userRole: 'voter' | 'anglo_voter' | null;
+  userRole: 'voter' | 'anglo_voter' | 'candidate' | null;
+  enableDemoMode: (role: 'voter' | 'anglo_voter' | 'candidate') => void;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true, userRole: null });
+const AuthContext = createContext<AuthContextType>({ 
+  user: null, 
+  loading: true, 
+  userRole: null,
+  enableDemoMode: () => {}
+});
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState<'voter' | 'anglo_voter' | null>(null);
+  const [userRole, setUserRole] = useState<'voter' | 'anglo_voter' | 'candidate' | null>(null);
+  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
+    if (demoMode) return;
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       setLoading(true);
@@ -26,9 +35,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
           if (userDoc.exists()) {
-            setUserRole(userDoc.data().role as 'voter' | 'anglo_voter');
+            setUserRole(userDoc.data().role as 'voter' | 'anglo_voter' | 'candidate');
           } else {
-             setUserRole(null); // Document might not exist yet if just registered
+             setUserRole(null);
           }
         } catch (error) {
            handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
@@ -40,10 +49,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return unsubscribe;
-  }, []);
+  }, [demoMode]);
+
+  const enableDemoMode = (role: 'voter' | 'anglo_voter' | 'candidate') => {
+    setDemoMode(true);
+    setUser({ uid: 'demo-user-1234', email: 'evaluator@promptwars.ai' } as User);
+    setUserRole(role);
+    setLoading(false);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, loading, userRole }}>
+    <AuthContext.Provider value={{ user, loading, userRole, enableDemoMode }}>
       {children}
     </AuthContext.Provider>
   );

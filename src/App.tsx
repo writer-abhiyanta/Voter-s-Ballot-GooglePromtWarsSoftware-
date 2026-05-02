@@ -26,6 +26,8 @@ const LearnElectionProcess = React.lazy(() => import('./components/LearnElection
 const SubmitFraud = React.lazy(() => import('./components/SubmitFraud').then(m => ({ default: m.SubmitFraud })));
 const AssetDetails = React.lazy(() => import('./components/AssetDetails').then(m => ({ default: m.AssetDetails })));
 const ElectionTimeline = React.lazy(() => import('./components/ElectionTimeline').then(m => ({ default: m.ElectionTimeline })));
+const AssetDeclarationForm = React.lazy(() => import('./components/AssetDeclarationForm').then(m => ({ default: m.AssetDeclarationForm })));
+const KnowBetter = React.lazy(() => import('./components/KnowBetter').then(m => ({ default: m.KnowBetter })));
 const ManifestoManager = React.lazy(() => import('./components/ManifestoManager'));
 const ManifestoTracker = React.lazy(() => import('./components/ManifestoTracker').then(m => ({ default: m.ManifestoTracker })));
 
@@ -54,7 +56,7 @@ const PageLoader = (): React.ReactElement => (
  */
 function Dashboard(): React.ReactElement {
   const { user, userRole } = useAuth();
-  const [activeTab, setActiveTab] = React.useState<'enrollment' | 'discovery' | 'manifesto' | 'manifesto-tracker' | 'learn' | 'fraud' | 'timeline' | 'assets'>('enrollment');
+  const [activeTab, setActiveTab] = React.useState<'enrollment' | 'discovery' | 'manifesto' | 'manifesto-tracker' | 'learn' | 'fraud' | 'timeline' | 'assets' | 'declare-assets' | 'know-better'>('enrollment');
   const [level1Done, setLevel1Done] = React.useState(false); // In real app, fetch from Firestore
   const [isBadgeEarned, setIsBadgeEarned] = React.useState(false);
 
@@ -110,12 +112,20 @@ function Dashboard(): React.ReactElement {
           aria-label="Dashboard Section Navigation"
         >
            {userRole === 'candidate' ? (
-             <TabButton 
-               active={activeTab === 'manifesto'} 
-               onClick={() => setActiveTab('manifesto')}
-               title="My Manifesto"
-               id="tab-manifesto"
-             />
+             <>
+               <TabButton 
+                 active={activeTab === 'manifesto'} 
+                 onClick={() => setActiveTab('manifesto')}
+                 title="My Manifesto"
+                 id="tab-manifesto"
+               />
+               <TabButton 
+                 active={activeTab === 'declare-assets'} 
+                 onClick={() => setActiveTab('declare-assets')}
+                 title="Declare Assets"
+                 id="tab-declare-assets"
+               />
+             </>
            ) : (
              <>
                 <TabButton 
@@ -135,6 +145,12 @@ function Dashboard(): React.ReactElement {
                   onClick={() => setActiveTab('manifesto-tracker')}
                   title="Manifesto"
                   id="tab-manifesto-tracker"
+                />
+                <TabButton 
+                  active={activeTab === 'know-better'} 
+                  onClick={() => setActiveTab('know-better')}
+                  title="Know Better (Pre-Term)"
+                  id="tab-know-better"
                 />
                 <TabButton 
                   active={activeTab === 'learn'} 
@@ -225,6 +241,18 @@ function Dashboard(): React.ReactElement {
             {activeTab === 'assets' && (
               <div className="h-full pt-8 pb-12">
                 <AssetDetails />
+              </div>
+            )}
+
+            {activeTab === 'declare-assets' && (
+              <div className="h-full pt-8 pb-12">
+                <AssetDeclarationForm />
+              </div>
+            )}
+
+            {activeTab === 'know-better' && (
+              <div className="h-full pt-8 pb-12">
+                <KnowBetter />
               </div>
             )}
           </Suspense>
