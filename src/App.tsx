@@ -232,8 +232,14 @@ function Dashboard(): React.ReactElement {
   const [isBadgeEarned, setIsBadgeEarned] = useStickyState<boolean>(false, "electoral_badge_earned", handleSnapshotFailure);
 
   React.useEffect(() => {
-    // Only set default if not already initialized from sticky state
-    if (!window.localStorage.getItem("electoral_active_tab") && !window.sessionStorage.getItem("electoral_active_tab")) {
+    let hasStorage = false;
+    try {
+      hasStorage = !!window.localStorage.getItem("electoral_active_tab") || !!window.sessionStorage.getItem("electoral_active_tab");
+    } catch {
+      // Ignored
+    }
+    
+    if (!hasStorage) {
       if (userRole === "candidate") {
         setActiveTab("manifesto");
       } else {
