@@ -11,10 +11,27 @@ import {
 } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getAnalytics } from "firebase/analytics";
+import { getPerformance } from "firebase/performance";
 import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 import firebaseConfig from "../../firebase-applet-config.json";
 
 export const app = initializeApp(firebaseConfig);
+
+let analyticsInstance = null;
+let performanceInstance = null;
+
+if (typeof window !== 'undefined') {
+  try {
+    analyticsInstance = getAnalytics(app);
+    performanceInstance = getPerformance(app);
+  } catch (e) {
+    console.warn("Analytics/Performance initialization skipped in this environment.");
+  }
+}
+
+export const analytics = analyticsInstance;
+export const performanceMonitoring = performanceInstance;
 
 let authInstance;
 try {
