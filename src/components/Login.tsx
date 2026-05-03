@@ -85,10 +85,10 @@ const Login: React.FC = () => {
         setError("Sign-in cancelled. Please try again.");
       } else if (err.code === "auth/cancelled-popup-request") {
         setError("Multiple popups opened. Please close others and try again.");
-      } else if (err.message && err.message.includes("The operation is insecure")) {
-        setError("Authentication blocked by browser settings. Please enable cookies or open in a new tab.");
+      } else if ((err?.message && err.message.includes("The operation is insecure")) || err?.name === "SecurityError") {
+        setError("Authentication blocked by browser settings. Please enable third-party cookies or open the app in a new tab.");
       } else {
-        setError(err.message || "Failed to sign in.");
+        setError(err?.message || "Failed to sign in. Please try again or open in a new tab.");
       }
     } finally {
       setLoading(false);

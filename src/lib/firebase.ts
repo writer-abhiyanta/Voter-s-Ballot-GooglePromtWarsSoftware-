@@ -18,15 +18,32 @@ export const app = initializeApp(firebaseConfig);
 
 let authInstance;
 try {
-  authInstance = initializeAuth(app, {
-    persistence: [browserLocalPersistence, browserSessionPersistence, inMemoryPersistence],
-    popupRedirectResolver: browserPopupRedirectResolver
-  });
-} catch (e) {
-  authInstance = initializeAuth(app, {
-    persistence: [inMemoryPersistence],
-    popupRedirectResolver: browserPopupRedirectResolver
-  });
+  // We use initializeAuth to explicitly avoid accessing localStorage if it's blocked,
+  // but if we don't provide persistence it uses the default which might throw.
+  // First we safely test if localStorage is accessible.
+  let isStorageAccessible = true;
+  try {
+    window.localStorage.setItem('__test', '1');
+    window.localStorage.removeItem('__test');
+  } catch (err) {
+    isStorageAccessible = false;
+  }
+
+  if (isStorageAccessible) {
+    authInstance = getAuth(app);
+  } else {
+    authInstance = initializeAuth(app, {
+      persistence: [inMemoryPersistence]
+    });
+  }
+} catch (e: any) {
+  try {
+    authInstance = getAuth(app);
+  } catch (fallbackErr) {
+    authInstance = initializeAuth(app, {
+      persistence: [inMemoryPersistence]
+    });
+  }
 }
 export const auth = authInstance;
 
