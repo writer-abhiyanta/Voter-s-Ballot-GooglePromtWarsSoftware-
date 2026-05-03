@@ -39,6 +39,8 @@ interface FraudReport {
 export const SubmitFraud: React.FC = (): React.ReactElement => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     location: "",
     incidentType: "",
@@ -81,6 +83,7 @@ export const SubmitFraud: React.FC = (): React.ReactElement => {
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmissionError(null);
 
     try {
       // Simulate Cloud Function invocation for anomaly pre-filtering
@@ -117,6 +120,7 @@ export const SubmitFraud: React.FC = (): React.ReactElement => {
       });
     } catch (error) {
       console.error("Submission error:", error);
+      setSubmissionError("We were unable to correctly process the AI classification. This may be due to high capacity. The report was not filed.");
     } finally {
       setIsSubmitting(false);
     }
@@ -263,6 +267,12 @@ export const SubmitFraud: React.FC = (): React.ReactElement => {
             }
           ></textarea>
         </div>
+
+        {submissionError && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-xl text-sm" role="alert">
+            <p>{submissionError}</p>
+          </div>
+        )}
 
         <button
           type="submit"

@@ -12,11 +12,42 @@
  * - Modularity: Strict decoupled Orthogonality (Coupling value approaches 0).
  */
 
-import React, { Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import React, { Suspense, useState, useEffect, useCallback } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AuthProvider } from "./components/AuthProvider";
 import Login from "./components/Login";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { logSystemHealth } from "./lib/monitoring";
+
+/**
+ * useStickyState: Syncs state with localStorage/sessionStorage for Snapshot persistence.
+ * Tracks failure counts and handles Snapshot state recovery.
+ */
+function useStickyState<T>(defaultValue: T, key: string, failureCallback: () => void): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const stickyValue = window.localStorage.getItem(key) || window.sessionStorage.getItem(key);
+      return stickyValue !== null ? JSON.parse(stickyValue) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      try {
+        window.sessionStorage.setItem(key, JSON.stringify(value));
+      } catch (err) {
+        logSystemHealth("SNAPSHOT_SAVE_FAILED", { key, error: String(err) });
+        failureCallback();
+      }
+    }
+  }, [key, value, failureCallback]);
+
+  return [value, setValue];
+}
 
 import { motion } from "framer-motion";
 import { useAuth } from "./components/AuthProvider";
@@ -168,7 +199,23 @@ function TabContent({ activeTab, level1Done, setLevel1Done, setActiveTab, setIsB
  */
 function Dashboard(): React.ReactElement {
   const { user, userRole } = useAuth();
-  const [activeTab, setActiveTab] = React.useState<
+  const navigate = useNavigate();
+  const [snapshotFailures, setSnapshotFailures] = useState(0);
+
+  const handleSnapshotFailure = useCallback(() => {
+    setSnapshotFailures((prev) => {
+      const newCount = prev + 1;
+      if (newCount > 2) {
+        logSystemHealth("CRITICAL_SNAPSHOT_FAILURE_THRESHOLD", { failures: newCount });
+        // After 2 failures, trigger Demo Mode (sign out and redirect)
+        // Let's redirect to login and pass demo configuration
+        navigate("/login?forceDemo=true", { replace: true });
+      }
+      return newCount;
+    });
+  }, [navigate]);
+
+  type TabType = 
     | "enrollment"
     | "discovery"
     | "manifesto"
@@ -178,18 +225,22 @@ function Dashboard(): React.ReactElement {
     | "timeline"
     | "assets"
     | "declare-assets"
-    | "know-better"
-  >("enrollment");
-  const [level1Done, setLevel1Done] = React.useState(false); // In real app, fetch from Firestore
-  const [isBadgeEarned, setIsBadgeEarned] = React.useState(false);
+    | "know-better";
+
+  const [activeTab, setActiveTab] = useStickyState<TabType>("enrollment", "electoral_active_tab", handleSnapshotFailure);
+  const [level1Done, setLevel1Done] = useStickyState<boolean>(false, "electoral_level1_done", handleSnapshotFailure);
+  const [isBadgeEarned, setIsBadgeEarned] = useStickyState<boolean>(false, "electoral_badge_earned", handleSnapshotFailure);
 
   React.useEffect(() => {
-    if (userRole === "candidate") {
-      setActiveTab("manifesto");
-    } else {
-      setActiveTab("enrollment");
+    // Only set default if not already initialized from sticky state
+    if (!window.localStorage.getItem("electoral_active_tab") && !window.sessionStorage.getItem("electoral_active_tab")) {
+      if (userRole === "candidate") {
+        setActiveTab("manifesto");
+      } else {
+        setActiveTab("enrollment");
+      }
     }
-  }, [userRole]);
+  }, [userRole, setActiveTab]);
 
   return (
     <div

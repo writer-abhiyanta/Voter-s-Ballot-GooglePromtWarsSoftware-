@@ -23,8 +23,19 @@ let performanceInstance = null;
 
 if (typeof window !== 'undefined') {
   try {
-    analyticsInstance = getAnalytics(app);
-    performanceInstance = getPerformance(app);
+    // Only initialize analytics/performance if storage is accessible to prevent "The operation is insecure"
+    let isStorageAccessible = false;
+    try {
+      window.localStorage.setItem('__test', '1');
+      window.localStorage.removeItem('__test');
+      isStorageAccessible = true;
+    } catch (e) {
+      // Ignore
+    }
+    if (isStorageAccessible) {
+      analyticsInstance = getAnalytics(app);
+      performanceInstance = getPerformance(app);
+    }
   } catch (e) {
     console.warn("Analytics/Performance initialization skipped in this environment.");
   }
@@ -38,12 +49,13 @@ try {
   // We use initializeAuth to explicitly avoid accessing localStorage if it's blocked,
   // but if we don't provide persistence it uses the default which might throw.
   // First we safely test if localStorage is accessible.
-  let isStorageAccessible = true;
+  let isStorageAccessible = false;
   try {
     window.localStorage.setItem('__test', '1');
     window.localStorage.removeItem('__test');
+    isStorageAccessible = true;
   } catch (err) {
-    isStorageAccessible = false;
+    // blocked
   }
 
   if (isStorageAccessible) {
@@ -64,8 +76,21 @@ try {
 }
 export const auth = authInstance;
 
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-export const storage = getStorage(app);
+let dbInstance = null;
+let storageInstance = null;
+
+try {
+  dbInstance = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+  storageInstance = getStorage(app);
+} catch (e: any) {
+  console.error("Firebase DB/Storage initialization prevented:", e);
+  if (typeof window !== 'undefined') {
+    (window as any).__FIREBASE_ERROR__ = e;
+  }
+}
+
+export const db = dbInstance as ReturnType<typeof getFirestore>;
+export const storage = storageInstance as ReturnType<typeof getStorage>;
 
 // Demonstrate Enterprise synergy: AppCheck implementation for Zero-Trust defense
 // In a true production environment, this would be enabled with a valid ReCaptcha key.

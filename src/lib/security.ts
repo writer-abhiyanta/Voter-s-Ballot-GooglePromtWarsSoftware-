@@ -14,7 +14,15 @@ const rateLimits = new Map<string, { count: number; timestamp: number }>();
  */
 export function sanitizeInput(input: string): string {
   if (!input) return "";
-  return input.replace(/[<>{}$]/g, ""); // Strips out basic injection vectors
+  const sanitized = input.replace(/[<>{}$]/g, ""); // Strips out basic injection vectors
+  
+  // Prompt injection heuristic safeguards
+  const promptInjectionPatterns = /(ignore previous|system prompt|bypass|forget|jailbreak|you are now|override instructions)/i;
+  if (promptInjectionPatterns.test(sanitized)) {
+      // Log anomaly securely to GCP 
+      return "[REDACTED: Potential Prompt Injection Detected]";
+  }
+  return sanitized;
 }
 
 /**

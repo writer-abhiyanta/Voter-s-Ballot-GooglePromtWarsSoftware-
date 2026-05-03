@@ -87,6 +87,12 @@ export const SmartAssistant: React.FC<SmartAssistantProps> = ({
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error(error);
+      const fallbackMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: "assistant",
+        text: "My neural connection is currently experiencing interference or high latency. Please retry your message, or navigate the dashboard manually using the menu.",
+      };
+      setMessages((prev) => [...prev, fallbackMessage]);
     } finally {
       setIsTyping(false);
     }

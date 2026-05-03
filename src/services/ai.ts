@@ -7,6 +7,65 @@ import { withCache } from "../lib/cache";
 
 let aiClient: GoogleGenAI | null = null;
 
+class CircuitBreaker {
+  state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
+  failures = 0;
+  lastFailureTime = 0;
+  
+  constructor(public threshold = 3, public timeout = 30000) {}
+  
+  async execute<T>(action: () => Promise<T>): Promise<T> {
+    if (this.state === 'OPEN') {
+      if (Date.now() - this.lastFailureTime > this.timeout) {
+         this.state = 'HALF_OPEN';
+      } else {
+         throw new Error("AI Service Temporary Disconnected (Circuit Breaker OPEN)");
+      }
+    }
+    
+    try {
+       const res = await action();
+       this.state = 'CLOSED';
+       this.failures = 0;
+       return res;
+    } catch(err) {
+       this.failures++;
+       this.lastFailureTime = Date.now();
+       if (this.failures >= this.threshold) {
+         this.state = 'OPEN';
+         logSystemHealth('CIRCUIT_BREAKER_OPENED', { failures: this.failures });
+       }
+       throw err;
+    }
+  }
+}
+const aiCircuitBreaker = new CircuitBreaker();
+
+/**
+ * Executes a function with Exponential Backoff Retry Logic.
+ * @param operation The async operation to perform.
+ * @param maxRetries Maximum number of retries before failing.
+ */
+async function withRetry<T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> {
+  return aiCircuitBreaker.execute(async () => {
+    let attempt = 0;
+    while (true) {
+      try {
+        return await operation();
+      } catch (error: any) {
+        attempt++;
+        if (attempt >= maxRetries) {
+          logSystemHealth('AI_RETRY_FAILED_MAX', { attempt, error: String(error) });
+          throw error;
+        }
+        const waitTimeMs = Math.pow(2, attempt) * 1000; // 2^n seconds wait
+        logSystemHealth('AI_RETRY_ATTEMPT', { attempt, waitTimeMs });
+        await new Promise(resolve => setTimeout(resolve, waitTimeMs));
+      }
+    }
+  });
+}
+
 /**
  * Retrieves the Gemini AI client instance.
  * Time Complexity: O(1)
@@ -41,7 +100,7 @@ export async function analyzeFraudReport(description: string) {
         assertRateLimit("analyze_fraud", 5, 60000); // 5 per minute
         const sanitizedInput = sanitizeInput(description);
         const ai = getAIClient();
-        const response = await ai.models.generateContent({
+        const response = await withRetry(() => ai.models.generateContent({
           model: "gemini-2.5-flash",
           contents: [
             {
@@ -88,7 +147,7 @@ Report: "${sanitizedInput}"`,
               required: ["severity", "suggestedCategory", "rationale"],
             },
           },
-        });
+        }));
 
         const outputText = response.text || "{}";
         const parsed = JSON.parse(outputText);
@@ -132,7 +191,7 @@ export async function generateVoterInsight(
       async () => {
         assertRateLimit('voter_insight', 20, 60000);
         const ai = getAIClient();
-        const response = await ai.models.generateContent({
+        const response = await withRetry(() => ai.models.generateContent({
           model: "gemini-2.5-flash",
           contents: [
             {
@@ -152,7 +211,7 @@ Generate a concise, 2-to-3 sentence analytical summary explaining why this candi
             maxOutputTokens: 256,
             temperature: 0.7,
           },
-        });
+        }));
         return (
           response.text || "You are highly aligned with " + topCandidateName + "."
         );
@@ -203,7 +262,7 @@ export async function agenticElectoralAnalysis(userQuery: string) {
       ],
     };
 
-    const response = await ai.models.generateContent({
+    const response = await withRetry(() => ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [{ role: "user", parts: [{ text: sanitizeInput(userQuery) }] }],
       config: {
@@ -212,7 +271,7 @@ export async function agenticElectoralAnalysis(userQuery: string) {
         systemInstruction:
           "You are an autonomous constitutional law agent. Use the database tool if asked about legality.",
       },
-    });
+    }));
 
     // Simulating the agentic loop resolution (mocking tool response handling for demo)
     if (response.functionCalls && response.functionCalls.length > 0) {
@@ -244,7 +303,7 @@ export async function analyzeDocumentMultiModal(
   try {
     const ai = getAIClient();
 
-    const response = await ai.models.generateContent({
+    const response = await withRetry(() => ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [
         {
@@ -258,7 +317,7 @@ export async function analyzeDocumentMultiModal(
         },
       ],
       config: { temperature: 0.1 },
-    });
+    }));
 
     return (
       response.text || "Document analysis completed with no actionable output."
@@ -318,7 +377,7 @@ Capabilities & Guidelines:
           ],
         };
 
-        const response = await ai.models.generateContent({
+        const response = await withRetry(() => ai.models.generateContent({
           model: "gemini-2.5-flash",
           contents: [{ role: "user", parts: [{ text: sanitizedInput }] }],
           config: {
@@ -328,7 +387,7 @@ Capabilities & Guidelines:
             // Enable Model Context Caching explicitly for high-frequency queries
             cachedContent: "roles_capabilities_v1" 
           },
-        });
+        }));
 
         if (response.functionCalls && response.functionCalls.length > 0) {
           const fnCall = response.functionCalls[0];
